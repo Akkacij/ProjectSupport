@@ -1,9 +1,13 @@
 from django.conf.urls import url
-from users.views import CreateUserAPIView, authenticate_user, UserRetrieveUpdateAPIView
+from django.urls import include
+from rest_framework import routers
 
+from users.views import CreateOrUpdateUser, AuthenticateUser
+
+router = routers.SimpleRouter()
+router.register(r'createorupdate', CreateOrUpdateUser)
+router.register(r'obtain_token', AuthenticateUser)
 
 urlpatterns = [
-    url(r'^create/$', CreateUserAPIView.as_view(), name='user_create'),
-    url(r'^obtain_token/$', authenticate_user, name='user_obtain_token'),
-    url(r'^update/$', UserRetrieveUpdateAPIView.as_view(), name='user_update'),
+    url('', include(router.urls)),
 ]

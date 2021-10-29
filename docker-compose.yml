@@ -8,9 +8,7 @@ services:
       - "8000:8000"
     volumes:
       - ./ProjectSupport:/ProjectSupport
-    command: >
-      sh -c "python manage.py migrate &&
-             python manage.py runserver"
+    command: python manage.py runserver
     env_file:
       - ./.env
     depends_on:
@@ -19,22 +17,6 @@ services:
   db:
     image: postgres:12-alpine
     env_file:
-      - ./.env
+      - ./ProjectSupport/.env
     ports:
       - "5432:5432"
-
-  redis:
-    image: redis:alpine
-  celery:
-    restart: always
-    build:
-      context:
-    command: celery -A ProjectSupport worker -l info
-    volumes:
-      - ./ProjectSupport:/ProjectSupport
-    env_file:
-      - ./.env
-    depends_on:
-      - db
-      - redis
-      - ProjectSupport

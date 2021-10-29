@@ -1,26 +1,22 @@
 from django.http import JsonResponse
-from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from rest_framework import status, viewsets
+from rest_framework.permissions import IsAuthenticated
+
+from support.models import Ticket
 from support.serializers import TicketSerializerUser
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated, ])
-def create_ticket_view(request):
-    """
-                Метод создания тикета пользователями:
-        title: "Тикет".(Краткое описание тикета)
-        description: "Описание проблемы".(Описание тикета)
-    Запрос(с токеном пользователя):
-    {
-    "title": "Тикет",
-    "description": "Описание проблемы"
-    }
-    """
-    request.data['from_user'] = request.user.pk
-    serializer = TicketSerializerUser(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
-    return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# The class creates a ticket. Available to all users.
+class CreateTicketView(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    queryset = Ticket.objects.all()
+    serializer_class = TicketSerializerUser
+    http_method_names = ['post']
+
+    def create(self, request):
+        request.data['from_user'] = request.user.pk
+        serializer = TicketSerializerUser(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
